@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* .my_logos ::-webkit-scrollbar{
+    color: red;
+} */
+/* .my_logos ::-webkit-scrollbar-thumb{
+    color: black;
+} */
+
+
 h1,
 h2,
 h3,

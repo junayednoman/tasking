@@ -7,6 +7,8 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import Home from './pages/home/Home.jsx';
+import SignUp from './pages/sign up/SignUp.jsx';
+import MyContextProvider from './context api/MyContext.jsx';
 
 const router = createBrowserRouter([
   {
@@ -16,6 +18,10 @@ const router = createBrowserRouter([
       {
         path: '/',
         element: <Home></Home>
+      },
+      {
+        path: '/sign-up',
+        element: <SignUp></SignUp>
       }
     ]
   },
@@ -24,6 +30,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <MyContextProvider>
+      <RouterProvider router={router} />
+    </MyContextProvider>
   </React.StrictMode>,
 )
