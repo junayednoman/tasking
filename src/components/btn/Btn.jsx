@@ -1,0 +1,10 @@
+
+const Btn = ({ text }) => {
+    return (
+        <div>
+            <button className='bg-[#6788f3] hover:bg-[#5d7adb] text-white text-lg py-2 px-6 font-medium duration-300 rounded-md'>{text}</button>
+        </div>
+    );
+};
+
+export default Btn;
