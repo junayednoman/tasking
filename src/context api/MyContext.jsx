@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { GoogleAuthProvider, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup, signOut } from "firebase/auth";
 import { app } from "../firebase/firebase.config";
 
 export const ContextAPI = createContext(null)
@@ -26,12 +26,16 @@ const MyContextProvider = ({ children }) => {
     const googleLogin = () => {
         return signInWithPopup(auth, googleProvider);
     }
+    const logOut = () => {
+        return signOut(auth);
+    }
     const contextInfo = {
         user,
         signUp,
         signIn,
         googleLogin,
-        loading
+        loading,
+        logOut
     }
     return (
         <ContextAPI.Provider value={contextInfo}>

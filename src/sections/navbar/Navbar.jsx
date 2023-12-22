@@ -1,27 +1,39 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import SectionContainer from "../../components/section container/SectionContainer";
 import logo from "../../assets/logo.png"
 import Btn from "../../components/btn/Btn";
+import { useContext } from "react";
+import { ContextAPI } from "../../context api/MyContext";
+import { ToastContainer, toast } from "react-toastify";
 
 const Navbar = () => {
+    const { user, logOut } = useContext(ContextAPI);
+    const navigate = useNavigate()
     const menuItems = [
         {
             text: "Home",
             link: "/"
         },
         {
-            text: "Home",
+            text: "About",
             link: "/"
         },
         {
-            text: "Home",
+            text: "Blogs",
             link: "/"
-        },
-        {
-            text: "Home",
-            link: "/"
-        },
+        }
     ]
+    const handleSignOut = () => {
+        logOut()
+            .then(result => {
+                toast.success("User logged out successfully");
+                navigate("/")
+            })
+            .catch(error => {
+                toast.error(error.message)
+            })
+    }
+    console.log(user);
     return (
         <div>
             <SectionContainer>
@@ -50,10 +62,20 @@ const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-end">
-                        <Btn text={"Sign Up"}></Btn>
+                        {
+                            user ?
+                                <Link onClick={handleSignOut}>
+                                    <Btn text={"Log Out"}></Btn>
+                                </Link>
+                                :
+                                <Link to={"/login"}>
+                                    <Btn text={"Login"}></Btn>
+                                </Link>
+                        }
                     </div>
                 </div>
             </SectionContainer>
+            <ToastContainer></ToastContainer>
         </div>
     );
 };

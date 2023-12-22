@@ -7,6 +7,7 @@ import { useContext } from "react";
 import { ContextAPI } from "../../context api/MyContext";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import GoogleLogin from "../../components/google login/GoogleLogin";
 
 
 const SignUp = () => {
@@ -77,10 +78,10 @@ const SignUp = () => {
             <div className="form-control mt-5">
               <Btn fulWidth={true} text='Sign Up' fullWidth={true} ></Btn>
             </div>
-            {/* <div className="divider">OR</div> */}
-            {/* <div><GoogleLogin></GoogleLogin></div> */}
+            <div className="divider">OR</div>
+            <div><GoogleLogin></GoogleLogin></div>
             <div className="mt-2">
-              <p>Already have an account? <Link className="font-semibold" to='/login'>Login</Link></p>
+              <p>Already have an account? <Link className="font-semibold text-[#5D7ADB] underline" to='/login'>Login</Link></p>
             </div>
           </form>
         </div>
