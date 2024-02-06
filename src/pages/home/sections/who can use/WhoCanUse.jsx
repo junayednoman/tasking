@@ -12,7 +12,7 @@ const WhoCanUse = () => {
                 <div>
                     <SectionTitle tag={"Solutions"} tagIcon={solutionImg} title={"Tailored for Every Profession"}></SectionTitle>
                     <p className="mb-4">Our task management website is a versatile solution embraced by developers for streamlined coding, corporate professionals for enhanced collaboration, bankers for meticulous financial processes, and individuals across diverse fields for its universal adaptability. </p>
-                    <Link to={"/login"}>
+                    <Link to={"/dashboard/tasks"}>
                         <Btn text={"Get Started Now"}></Btn>
                     </Link>
                 </div>

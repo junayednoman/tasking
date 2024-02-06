@@ -11,7 +11,7 @@ import GoogleLogin from "../../components/google login/GoogleLogin";
 
 
 const SignUp = () => {
-  const { signUp } = useContext(ContextAPI);
+  const { signUp, updateUserProfile } = useContext(ContextAPI);
   const {
     register,
     handleSubmit
@@ -22,7 +22,13 @@ const SignUp = () => {
     signUp(data.email, data.password)
       .then(result => {
         if (result.user) {
-          toast.success("user has created successfully")
+          updateUserProfile(data.name, data.image)
+            .then(() => {
+              toast.success("user has created successfully")
+            })
+            .catch(error => {
+              console.log(error);
+            })
         }
       })
       .catch(error => {
@@ -85,7 +91,7 @@ const SignUp = () => {
             </div>
           </form>
         </div>
-      <ToastContainer></ToastContainer>
+        <ToastContainer></ToastContainer>
       </div>
     </SectionContainer>
   );
