@@ -5,10 +5,23 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import useAxiosSecure from "../../custom hooks/useAxiosSecure";
 import { ToastContainer, toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
 
 const Tasks = () => {
     const axiosSecure = useAxiosSecure();
     const { register, handleSubmit, reset } = useForm();
+
+    // load todo items from DB
+    const { data: todoItems, isPending } = useQuery({
+        queryKey: ["todoItems"],
+        queryFn: async () => {
+            const res = await axiosSecure.get("/my-tasks");
+            return res.data;
+        }
+    })
+    const [loadedItems, setLoadedItems] = useState(todoItems);
+
+
     const [todoTasks, setTodoTasks] = useState(
         [
             { id: 'task-1', content: 'Task 1' },
@@ -31,7 +44,6 @@ const Tasks = () => {
         ]
     );
     const handleTaskSubmit = (data) => {
-        //    console.log(data);
         data.status = "to-do"
         axiosSecure.post('/tasks', data)
             .then(res => {

@@ -14,6 +14,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import Dashboard from './dashboard/Dashboard.jsx';
 import Profile from './dashboard/profile/Profile.jsx';
 import Tasks from './dashboard/tasks/Tasks.jsx';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const router = createBrowserRouter([
   {
@@ -55,13 +56,15 @@ const router = createBrowserRouter([
   }
 ]);
 
-
+const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <MyContextProvider>
-      <HelmetProvider>
-        <RouterProvider router={router} />
-      </HelmetProvider>
-    </MyContextProvider>
+    <QueryClientProvider client={queryClient}>
+      <MyContextProvider>
+        <HelmetProvider>
+          <RouterProvider router={router} />
+        </HelmetProvider>
+      </MyContextProvider>
+    </QueryClientProvider>
   </React.StrictMode>,
 )
