@@ -1,26 +1,37 @@
 import SectionContainer from "../../components/section container/SectionContainer";
 import Btn from "../../components/btn/Btn";
 import { ReactSortable } from "react-sortablejs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useAxiosSecure from "../../custom hooks/useAxiosSecure";
 import { ToastContainer, toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
+import loadingGIF from "../../assets/loading.gif"
+import TaskItems from "../../components/task items/TaskItems";
 
 const Tasks = () => {
     const axiosSecure = useAxiosSecure();
     const { register, handleSubmit, reset } = useForm();
-
+    const [myTodoTasks, setMyTodoTasks] = useState([])
+    const [myOngoingTasks, setMyOngoingTasks] = useState([])
+    const [myCompletedTasks, setMyCompletedTasks] = useState([])
     // load todo items from DB
-    const { data: todoItems, isPending } = useQuery({
-        queryKey: ["todoItems"],
+    const { isPending, isError, data: taskItems, error, refetch, } = useQuery({
+        queryKey: ["taskItems"],
         queryFn: async () => {
             const res = await axiosSecure.get("/my-tasks");
             return res.data;
         }
     })
-    const [loadedItems, setLoadedItems] = useState(todoItems);
-
+    const myTodoTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "to-do");
+    const myOngoingTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "ongoing");
+    const myCompletedTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "completed");
+    useEffect(() => {
+        setMyOngoingTasks(myOngoingTasks2);
+        setMyTodoTasks(myTodoTasks2);
+        setMyCompletedTasks(myCompletedTasks2);
+    }, [taskItems])
+    // console.log(myOngoingTasks);
 
     const [todoTasks, setTodoTasks] = useState(
         [
@@ -51,8 +62,24 @@ const Tasks = () => {
                 if (res.data.acknowledged === true) {
                     toast.success("Task added successfully!😊")
                     reset();
+                    refetch();
                 }
             })
+    }
+    if (isError) {
+        return (
+            <div className="text-center mt-32">
+                <h2 className="text-4xl mb-2">{error.message} 😔</h2>
+                <p>Please try again later</p>
+            </div>
+        )
+    }
+    if (isPending) {
+        return (
+            <div className="h-[100vh] flex justify-center items-center">
+                <img src={loadingGIF}></img>
+            </div>
+        )
     }
     return (
         <div className="md:py-20 py-12">
@@ -61,20 +88,21 @@ const Tasks = () => {
                     <div className="p-5 pt-0 bg-[#D9E1FC] rounded-md space-y-3 h-fit">
                         <h4 className="pt-5">To-Do</h4>
                         <div id="innerItems1">
-                            <ReactSortable
-                                group={"shared"}
-                                animation={100}
-                                list={todoTasks}
-                                setList={setTodoTasks}
-                            >
-                                {
-                                    todoTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : todoTasks.map(task => (
-                                        <div key={task.id} className="bg-white rounded-[4px] py-2 px-3 cursor-grabbing mb-3">
-                                            <p>{task.content}</p>
-                                        </div>
-                                    ))
-                                }
-                            </ReactSortable>
+                            {
+                                myTodoTasks &&
+                                <ReactSortable
+                                    group={"shared"}
+                                    animation={100}
+                                    list={myTodoTasks}
+                                    setList={setMyTodoTasks}
+                                >
+                                    {
+                                        myTodoTasks?.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : myTodoTasks?.map(task => (
+                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                        ))
+                                    }
+                                </ReactSortable>
+                            }
                         </div>
                         <span onClick={() => document.getElementById('todo-modal').showModal()}>
                             <Btn text={"Add New Task"} fullWidth={true}></Btn>
@@ -83,47 +111,49 @@ const Tasks = () => {
                     <div className="p-5 pt-0 bg-[#D9E1FC] rounded-md space-y-3 h-fit">
                         <h4 className="pt-5">Ongoing</h4>
                         <div id="innerItems1">
-                            <ReactSortable
-                                group={"shared"}
-                                animation={100}
-                                list={ongoingTasks}
-                                setList={setOngoingTasks}
-                            >
-                                {
-                                    ongoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : ongoingTasks.map(task => (
-                                        <div key={task.id} className="bg-white rounded-[4px] py-2 px-3 cursor-grabbing mb-3">
-                                            <p>{task.content}</p>
-                                        </div>
-                                    ))
-                                }
-                            </ReactSortable>
+                            {
+                                myOngoingTasks &&
+                                <ReactSortable
+                                    group={"shared"}
+                                    animation={100}
+                                    list={myOngoingTasks}
+                                    setList={setMyOngoingTasks}
+                                >
+                                    {
+                                        myOngoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : myOngoingTasks.map(task => (
+                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                        ))
+                                    }
+                                </ReactSortable>
+                            }
                         </div>
 
                     </div>
                     <div className="p-5 pt-0 bg-[#D9E1FC] rounded-md space-y-3 h-fit">
                         <h4 className="pt-5">Completed</h4>
                         <div id="innerItems1">
-                            <ReactSortable
-                                group={"shared"}
-                                animation={100}
-                                list={completedTasks}
-                                setList={setCompletedTasks}
-                            >
-                                {
-                                    completedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : completedTasks.map(task => (
-                                        <div key={task.id} className="bg-white rounded-[4px] py-2 px-3 cursor-grabbing mb-3">
-                                            <p>{task.content}</p>
-                                        </div>
-                                    ))
-                                }
-                            </ReactSortable>
+                            {
+                                myCompletedTasks &&
+                                <ReactSortable
+                                    group={"shared"}
+                                    animation={100}
+                                    list={myCompletedTasks}
+                                    setList={setMyCompletedTasks}
+                                >
+                                    {
+                                        myCompletedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : myCompletedTasks.map(task => (
+                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                        ))
+                                    }
+                                </ReactSortable>
+                            }
                         </div>
 
                     </div>
-                </div>
+                </div >
 
                 {/* modal for todo */}
-                <dialog id="todo-modal" className="modal">
+                < dialog id="todo-modal" className="modal" >
                     <div className="modal-box max-w-2xl">
                         <form method="dialog">
                             {/* if there is a button in form, it will close the modal */}
@@ -163,13 +193,13 @@ const Tasks = () => {
                     <form method="dialog" className="modal-backdrop">
                         <button>close</button>
                     </form>
-                </dialog>
+                </dialog >
 
-            </SectionContainer>
+            </SectionContainer >
             <ToastContainer
                 autoClose={1600}
             ></ToastContainer>
-        </div>
+        </div >
 
     );
 };
