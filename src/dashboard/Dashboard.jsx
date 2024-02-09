@@ -37,7 +37,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="w-[calc(100%-280px)]">
+                <div className="w-[calc(100%-280px)] overflow-x-auto md:py-20 py-12 dashboardOutlet">
                     <Outlet></Outlet>
                 </div>
             </div>

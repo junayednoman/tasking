@@ -33,3 +33,17 @@ body {
     background-size: cover;
     /* background-repeat: repeat; */
 }
+
+.dropdown .dropdown-content {
+    left: 100%;
+    top: 5px;
+    border-radius: 5px;
+}
+
+html{
+    scrollbar-width: thin;
+    scrollbar-color: #5D7ADB !important;
+}
+.dashboardOutlet{
+    scrollbar-width: thin;
+}

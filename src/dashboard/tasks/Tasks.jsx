@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import useAxiosSecure from "../../custom hooks/useAxiosSecure";
 import { ToastContainer, toast } from "react-toastify";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import loadingGIF from "../../assets/loading.gif"
-import TaskItems from "../../components/task items/TaskItems";
+import TaskItem from "../../components/task item/TaskItem";
 
 const Tasks = () => {
     const axiosSecure = useAxiosSecure();
@@ -15,6 +15,11 @@ const Tasks = () => {
     const [myTodoTasks, setMyTodoTasks] = useState([])
     const [myOngoingTasks, setMyOngoingTasks] = useState([])
     const [myCompletedTasks, setMyCompletedTasks] = useState([])
+    const addTaskMutation = useMutation({
+        mutationFn: async (newTask) => {
+            return axiosSecure.post('/tasks', newTask)
+        },
+    })
     // load todo items from DB
     const { isPending, isError, data: taskItems, error, refetch, } = useQuery({
         queryKey: ["taskItems"],
@@ -31,32 +36,11 @@ const Tasks = () => {
         setMyTodoTasks(myTodoTasks2);
         setMyCompletedTasks(myCompletedTasks2);
     }, [taskItems])
-    // console.log(myOngoingTasks);
 
-    const [todoTasks, setTodoTasks] = useState(
-        [
-            { id: 'task-1', content: 'Task 1' },
-            { id: 'task-2', content: 'Task 2' },
-            { id: 'task-3', content: 'Task 3' }
-        ]
-    );
-    const [ongoingTasks, setOngoingTasks] = useState(
-        [
-            // { id: 'task-4', content: 'Task 4' },
-            // { id: 'task-5', content: 'Task 5' },
-            // { id: 'task-6', content: 'Task 6' }
-        ]
-    );
-    const [completedTasks, setCompletedTasks] = useState(
-        [
-            { id: 'task-7', content: 'Task 7' },
-            { id: 'task-8', content: 'Task 8' },
-            { id: 'task-9', content: 'Task 9' }
-        ]
-    );
+    // function to post task item to database
     const handleTaskSubmit = (data) => {
         data.status = "to-do"
-        axiosSecure.post('/tasks', data)
+        addTaskMutation.mutateAsync(data)
             .then(res => {
                 console.log(res.data);
                 if (res.data.acknowledged === true) {
@@ -66,6 +50,14 @@ const Tasks = () => {
                 }
             })
     }
+
+    // const handle options
+    const handleShowOptions = (id) => {
+        // console.log(id);
+    }
+
+
+    // show error message if occurs any error while fetching the task data from DB
     if (isError) {
         return (
             <div className="text-center mt-32">
@@ -82,7 +74,7 @@ const Tasks = () => {
         )
     }
     return (
-        <div className="md:py-20 py-12">
+        <>
             <SectionContainer>
                 <div id="items" className="grid grid-cols-3 md:gap-4">
                     <div className="p-5 pt-0 bg-[#D9E1FC] rounded-md space-y-3 h-fit">
@@ -98,7 +90,7 @@ const Tasks = () => {
                                 >
                                     {
                                         myTodoTasks?.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : myTodoTasks?.map(task => (
-                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                            <TaskItem handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                         ))
                                     }
                                 </ReactSortable>
@@ -107,6 +99,7 @@ const Tasks = () => {
                         <span onClick={() => document.getElementById('todo-modal').showModal()}>
                             <Btn text={"Add New Task"} fullWidth={true}></Btn>
                         </span>
+
                     </div>
                     <div className="p-5 pt-0 bg-[#D9E1FC] rounded-md space-y-3 h-fit">
                         <h4 className="pt-5">Ongoing</h4>
@@ -121,7 +114,7 @@ const Tasks = () => {
                                 >
                                     {
                                         myOngoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : myOngoingTasks.map(task => (
-                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                            <TaskItem handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                         ))
                                     }
                                 </ReactSortable>
@@ -142,7 +135,7 @@ const Tasks = () => {
                                 >
                                     {
                                         myCompletedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : myCompletedTasks.map(task => (
-                                            <TaskItems key={task._id} task={task}></TaskItems>
+                                            <TaskItem handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                         ))
                                     }
                                 </ReactSortable>
@@ -199,9 +192,11 @@ const Tasks = () => {
             <ToastContainer
                 autoClose={1600}
             ></ToastContainer>
-        </div >
+        </ >
 
     );
 };
 
 export default Tasks;
+
+
