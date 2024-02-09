@@ -3,13 +3,12 @@ import SectionContainer from "../../components/section container/SectionContaine
 import Btn from "../../components/btn/Btn";
 import { useForm } from "react-hook-form";
 import loginImg from "../../assets/login.png"
-import { useContext } from "react";
-import { ContextAPI } from "../../context api/MyContext";
 import { ToastContainer, toast } from "react-toastify";
 import GoogleLogin from "../../components/google login/GoogleLogin";
+import useContextData from "../../custom hooks/get context data/useContextData";
 
 const Login = () => {
-    const { signIn } = useContext(ContextAPI);
+    const { signIn } = useContextData();
     const {
         register,
         handleSubmit

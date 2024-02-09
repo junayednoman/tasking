@@ -1,11 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 import SectionContainer from '../../components/section container/SectionContainer';
 import SectionTitle from '../../components/section title/SectionTitle';
-import { useContext } from 'react';
-import { ContextAPI } from '../../context api/MyContext';
+import useContextData from '../../custom hooks/get context data/useContextData';
 
 const Profile = () => {
-    const { user } = useContext(ContextAPI)
+    const { user } = useContextData()
     return (
         <div className='md:py-20 py-10'>
             <Helmet>

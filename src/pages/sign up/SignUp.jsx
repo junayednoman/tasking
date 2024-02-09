@@ -3,28 +3,38 @@ import { Link } from "react-router-dom";
 import Btn from "../../components/btn/Btn";
 import SectionContainer from "../../components/section container/SectionContainer";
 import loginImg from "../../assets/login.png"
-import { useContext } from "react";
-import { ContextAPI } from "../../context api/MyContext";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import GoogleLogin from "../../components/google login/GoogleLogin";
+import usePostData from "../../custom hooks/post data/usePostData";
+import useContextData from "../../custom hooks/get context data/useContextData";
 
 
 const SignUp = () => {
-  const { signUp, updateUserProfile } = useContext(ContextAPI);
+  const { signUp, updateUserProfile } = useContextData();
   const {
     register,
     handleSubmit
   } = useForm()
+  const userDataMutation = usePostData({ url: "/users" });
 
   const handleSignUp = (data) => {
-    console.log('sign up', data);
     signUp(data.email, data.password)
       .then(result => {
         if (result.user) {
           updateUserProfile(data.name, data.image)
             .then(() => {
-              toast.success("user has created successfully")
+              delete data.password;
+              userDataMutation.mutateAsync(data)
+                .then(res => {
+                  if (res?.data?.insertedId) {
+                    toast.success("user has created successfully😊")
+                  }
+                })
+                .catch(error => {
+                  toast.error(error.message)
+                })
+              console.log("sign-up", data);
             })
             .catch(error => {
               console.log(error);

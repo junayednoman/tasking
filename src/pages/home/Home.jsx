@@ -1,12 +1,12 @@
-import { useContext } from "react";
+
+import useContextData from "../../custom hooks/get context data/useContextData";
 import Banner from "./sections/banner/Banner";
 import Logos from "./sections/logos/Logos";
 import WhoCanUse from "./sections/who can use/WhoCanUse";
-import { ContextAPI } from "../../context api/MyContext";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-    const { user, loading } = useContext(ContextAPI);
+    const { user, loading } = useContextData();
     const navigate = useNavigate();
 
     if (loading) {

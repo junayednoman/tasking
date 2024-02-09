@@ -35,7 +35,7 @@ const TaskItem = ({ task, handleShowOptions }) => {
                     <hr className='my-2' />
                     <li><a><FaRegEye className='text-lg' />View Details</a></li>
                     <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
-                    <li><a><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
+                    <li><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
                 </ul>
             </details>
         </div>

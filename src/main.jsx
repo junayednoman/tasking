@@ -15,6 +15,7 @@ import Dashboard from './dashboard/Dashboard.jsx';
 import Profile from './dashboard/profile/Profile.jsx';
 import Tasks from './dashboard/tasks/Tasks.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import PrivatePageWrapper from './private page wrapper/PrivatePageWrapper.jsx';
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
   // dashboard routes
   {
     path: "/",
-    element: <Dashboard></Dashboard>,
+    element: <PrivatePageWrapper><Dashboard></Dashboard></PrivatePageWrapper>,
     children: [
       {
         path: '/dashboard',
@@ -46,11 +47,11 @@ const router = createBrowserRouter([
       },
       {
         path: '/dashboard/profile',
-        element: <Profile></Profile>
+        element: <PrivatePageWrapper><Profile></Profile></PrivatePageWrapper>
       },
       {
         path: '/dashboard/tasks',
-        element: <Tasks></Tasks>
+        element: <PrivatePageWrapper><Tasks></Tasks></PrivatePageWrapper>
       },
     ]
   }

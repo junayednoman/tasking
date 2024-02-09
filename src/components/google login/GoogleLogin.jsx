@@ -1,14 +1,13 @@
-import { useContext } from "react";
-import { ContextAPI } from "../../context api/MyContext";
 import { toast } from "react-toastify";
 import Btn from "../btn/Btn";
+import useContextData from "../../custom hooks/get context data/useContextData";
 
 
 const GoogleLogin = () => {
-    const { googleLogin } = useContext(ContextAPI)
+    const { googleLogin } = useContextData()
     const handleGoogleLogin = () => {
         googleLogin()
-            .then(reslut => {
+            .then(() => {
                 toast.success("User logged in successfully")
             })
             .catch(error => {
@@ -17,7 +16,7 @@ const GoogleLogin = () => {
 
     }
     return (
-        <div onClick={handleGoogleLogin} className="border-2">
+        <div onClick={handleGoogleLogin}>
             <Btn text={"Login With Google "} fullWidth={true}></Btn>
         </div>
     );

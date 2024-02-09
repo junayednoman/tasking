@@ -1,13 +1,12 @@
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SectionContainer from "../../components/section container/SectionContainer";
 import logo from "../../assets/logo.png"
 import Btn from "../../components/btn/Btn";
-import { useContext } from "react";
-import { ContextAPI } from "../../context api/MyContext";
 import { ToastContainer, toast } from "react-toastify";
+import useContextData from "../../custom hooks/get context data/useContextData";
 
 const Navbar = () => {
-    const { user, logOut } = useContext(ContextAPI);
+    const { user, logOut } = useContextData();
     const navigate = useNavigate()
     const menuItems = [
         {
@@ -25,7 +24,7 @@ const Navbar = () => {
     ]
     const handleSignOut = () => {
         logOut()
-            .then(result => {
+            .then(() => {
                 toast.success("User logged out successfully");
                 navigate("/")
             })
@@ -33,7 +32,6 @@ const Navbar = () => {
                 toast.error(error.message)
             })
     }
-    console.log(user);
     return (
         <div>
             <SectionContainer>

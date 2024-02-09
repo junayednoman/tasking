@@ -3,31 +3,20 @@ import Btn from "../../components/btn/Btn";
 import { ReactSortable } from "react-sortablejs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import useAxiosSecure from "../../custom hooks/useAxiosSecure";
 import { ToastContainer, toast } from "react-toastify";
-import { useMutation, useQuery } from "@tanstack/react-query";
 import loadingGIF from "../../assets/loading.gif"
 import TaskItem from "../../components/task item/TaskItem";
+import usePostData from "../../custom hooks/post data/usePostData";
+import useGetData from "../../custom hooks/get data/useGetData";
 
 const Tasks = () => {
-    const axiosSecure = useAxiosSecure();
     const { register, handleSubmit, reset } = useForm();
     const [myTodoTasks, setMyTodoTasks] = useState([])
     const [myOngoingTasks, setMyOngoingTasks] = useState([])
     const [myCompletedTasks, setMyCompletedTasks] = useState([])
-    const addTaskMutation = useMutation({
-        mutationFn: async (newTask) => {
-            return axiosSecure.post('/tasks', newTask)
-        },
-    })
-    // load todo items from DB
-    const { isPending, isError, data: taskItems, error, refetch, } = useQuery({
-        queryKey: ["taskItems"],
-        queryFn: async () => {
-            const res = await axiosSecure.get("/my-tasks");
-            return res.data;
-        }
-    })
+    const addTaskMutation = usePostData({ url: "/tasks" });
+    const { isPending, data: taskItems, isError, error, refetch } = useGetData({ key: "my-tasks", url: "/my-tasks" });
+
     const myTodoTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "to-do");
     const myOngoingTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "ongoing");
     const myCompletedTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "completed");
@@ -42,17 +31,19 @@ const Tasks = () => {
         data.status = "to-do"
         addTaskMutation.mutateAsync(data)
             .then(res => {
-                console.log(res.data);
                 if (res.data.acknowledged === true) {
                     toast.success("Task added successfully!😊")
                     reset();
                     refetch();
                 }
             })
+            .catch(error => {
+                toast.error(error.message)
+            })
     }
 
     // const handle options
-    const handleShowOptions = (id) => {
+    const handleShowOptions = () => {
         // console.log(id);
     }
 
