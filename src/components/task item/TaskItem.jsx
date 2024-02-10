@@ -6,12 +6,10 @@ import { GrPowerCycle } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
 
-
-
-const TaskItem = ({ task, handleShowOptions }) => {
+const TaskItem = ({ task, handleShowOptions, handleTaskDetails, detailedTask }) => {
     return (
         <div id={task._id} className="bg-white rounded-[4px] py-2 px-3 cursor-pointer mb-3 flex items-center justify-between">
-            <div>
+            <div onClick={() => handleTaskDetails(task._id)} className='w-[90%]'>
                 <div className="tooltip tooltip-right" data-tip={`${task.priority === "High" ? 'High Priority' :
                     (
                         task.priority === "Moderate" ? 'Moderate Priority' : 'Low Priority'
@@ -22,29 +20,33 @@ const TaskItem = ({ task, handleShowOptions }) => {
                 {/* show task name */}
                 <p className='text-sm'>{task.title}</p>
             </div>
-            <details className="dropdown">
-                <summary onClick={() => handleShowOptions(task._id)} className="p-1 btn bg-transparent border-0 shadow-none hover:bg-transparent">
-                    <div className='w-[20px] py-2 flex justify-center'>
-                        <BsThreeDotsVertical className='text-lg'></BsThreeDotsVertical>
-                    </div>
-                </summary>
-                <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-[180px] font-medium">
-                    <p className='m-1'>Mark as:</p>
-                    <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
-                    <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
-                    <hr className='my-2' />
-                    <li><a><FaRegEye className='text-lg' />View Details</a></li>
-                    <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
-                    <li><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
-                </ul>
-            </details>
+            <div className='w-[6%]'>
+                <details className="dropdown">
+                    <summary onClick={() => handleShowOptions(task._id)} className="p-1 btn bg-transparent border-0 shadow-none hover:bg-transparent">
+                        <div className='w-[20px] py-2 flex justify-center mx-auto'>
+                            <BsThreeDotsVertical className='text-lg'></BsThreeDotsVertical>
+                        </div>
+                    </summary>
+                    <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-[180px] font-medium">
+                        <p className='m-1'>Mark as:</p>
+                        <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
+                        <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
+                        <hr className='my-2' />
+                        <li><a><FaRegEye className='text-lg' />View Details</a></li>
+                        <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
+                        <li><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
+                    </ul>
+                </details>
+            </div>
         </div>
     );
 };
 
 TaskItem.propTypes = {
     task: PropTypes.object,
-    handleShowOptions: PropTypes.func
+    handleShowOptions: PropTypes.func,
+    handleTaskDetails: PropTypes.func,
+    detailedTask: PropTypes.object
 }
 
 export default TaskItem;

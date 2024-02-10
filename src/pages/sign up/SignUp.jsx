@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form"
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import Btn from "../../components/btn/Btn";
 import SectionContainer from "../../components/section container/SectionContainer";
 import loginImg from "../../assets/login.png"
@@ -11,12 +11,16 @@ import useContextData from "../../custom hooks/get context data/useContextData";
 
 
 const SignUp = () => {
-  const { signUp, updateUserProfile } = useContextData();
+  const { signUp, updateUserProfile, user } = useContextData();
+  console.log(user);
   const {
     register,
     handleSubmit
   } = useForm()
   const userDataMutation = usePostData({ url: "/users" });
+  if (user) {
+    return <Navigate to={"/"}></Navigate>
+  }
 
   const handleSignUp = (data) => {
     signUp(data.email, data.password)

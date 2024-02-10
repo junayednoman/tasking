@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import SectionContainer from "../../components/section container/SectionContainer";
 import Btn from "../../components/btn/Btn";
 import { useForm } from "react-hook-form";
@@ -8,11 +8,14 @@ import GoogleLogin from "../../components/google login/GoogleLogin";
 import useContextData from "../../custom hooks/get context data/useContextData";
 
 const Login = () => {
-    const { signIn } = useContextData();
+    const { signIn, user } = useContextData();
     const {
         register,
         handleSubmit
     } = useForm()
+    if(user){
+        return <Navigate to={"/"}></Navigate>
+    }
     const handleSignIn = (data) => {
         signIn(data.email, data.password)
             .then(result => {

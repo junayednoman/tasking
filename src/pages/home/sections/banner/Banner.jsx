@@ -11,7 +11,7 @@ const Banner = () => {
             <SectionContainer>
                 <h1 className='font-semibold md:text-6xl text-4xl md:leading-[75px]'> Effortless Task Management <br className='lg:block hidden' /> <span className='text-[#5D7ADB]'>Made Simple</span></h1>
                 <p className='md:my-3 my-2 md:mb-5 mb-3'>Experience the power of efficient task management <br className='md:block hidden' /> with our intuitive and user-friendly app.</p>
-                <Link to={ user ? '/dashboard/profile' : `/sign-up`}>
+                <Link to={ user ? '/dashboard/tasks' : `/sign-up`}>
                     <Btn text={"Let’s Explore"}></Btn>
                 </Link>
                 <img className='mx-auto md:mt-16 mt-8' src={bannerImg} alt="" />
