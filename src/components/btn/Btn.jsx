@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 
 const Btn = ({ text, fullWidth }) => {
     return (
@@ -6,5 +7,10 @@ const Btn = ({ text, fullWidth }) => {
         </div>
     );
 };
+
+Btn.propTypes = {
+    text: PropTypes.string,
+    fullWidth: PropTypes.string
+}
 
 export default Btn;

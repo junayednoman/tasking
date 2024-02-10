@@ -13,8 +13,10 @@ import notFound from "../../assets/not found.gif"
 import useAxiosSecure from "../../custom hooks/useAxiosSecure";
 import { GrPowerCycle } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
-import { FaRegEdit, FaRegEye } from "react-icons/fa";
+import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import Swal from "sweetalert2";
+import { useMutation } from "@tanstack/react-query";
 
 const Tasks = () => {
     const { user } = useContextData();
@@ -22,11 +24,18 @@ const Tasks = () => {
     const [myTodoTasks, setMyTodoTasks] = useState([]);
     const [myOngoingTasks, setMyOngoingTasks] = useState([]);
     const [myCompletedTasks, setMyCompletedTasks] = useState([]);
+    // const [deleteItemId, setDeleteItemId] = useState("");
     const [detailedTask, setDetailedTask] = useState({});
     const addTaskMutation = usePostData({ url: "/tasks" });
     const axiosSecure = useAxiosSecure();
+    // get task data based on user email
     const { isPending, data: taskItems, isError, error, refetch } = useGetData({ key: "my-tasks", url: `/tasks/${user?.email}` });
-
+    // react mutation for deleting a task
+    const deleteMutation = useMutation({
+        mutationFn: async (id) => {
+            return await axiosSecure.delete(`/tasks/${user?.email}/${id}`)
+        }
+    });
 
     // filter task item by task status
     const myTodoTasks2 = taskItems?.filter(loadedItem => loadedItem.status === "to-do");
@@ -41,7 +50,7 @@ const Tasks = () => {
     // show task details on clicking over task
     const handleTaskDetails = async (id) => {
         document.getElementById("showTaskDetails").showModal()
-        axiosSecure.get(`/taskss/${user?.email}/${id}`)
+        axiosSecure.get(`/tasks/${user?.email}/${id}`)
             .then(res => {
                 setDetailedTask(res.data)
             })
@@ -58,15 +67,65 @@ const Tasks = () => {
             addTaskMutation.mutateAsync(data)
                 .then(res => {
                     if (res.data.acknowledged === true) {
-                        toast.success("Task added successfully!😊")
+                        toast.success("Task added successfully!😊");
+                        document.getElementById("todo-modal").close();
                         reset();
                         refetch();
                     }
                 })
                 .catch(error => {
-                    toast.error(error.message)
+                    toast.error(error.message);
                 })
         }
+    }
+
+    // handle task delete
+    const handleTaskDelete = (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteMutation.mutateAsync(id)
+                    .then(res => {
+                        if (res.data.deletedCount === 1) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: "Your task has been deleted.",
+                                icon: "success"
+                            });
+                            document.getElementById("task-delete-confirmation").classList.add("hidden")
+                            refetch();
+                        }
+                    })
+            }
+        });
+
+    }
+    const handleShowDeleteConfirmation = () => {
+        const deleteConfirmationModal = document.getElementById("task-delete-confirmation");
+        deleteConfirmationModal.classList.toggle("hidden");
+    }
+
+    const handleDeleteTaskOnModal = (id) => {
+        deleteMutation.mutateAsync(id)
+            .then(res => {
+                if (res.data.deletedCount === 1) {
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your task has been deleted.",
+                        icon: "success"
+                    });
+                    document.getElementById("task-delete-confirmation").classList.add("hidden");
+                    document.getElementById("showTaskDetails").close()
+                    refetch();
+                }
+            })
     }
 
     // const handle options
@@ -120,7 +179,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myTodoTasks?.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : myTodoTasks?.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -144,7 +203,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myOngoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : myOngoingTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -165,7 +224,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myCompletedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : myCompletedTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -221,58 +280,66 @@ const Tasks = () => {
                 </dialog >
 
                 {/* modal for todo details */}
-                {
-                    detailedTask &&
-                    < dialog id="showTaskDetails" className="modal" >
-                        <div className="modal-box max-w-2xl">
-                            <form method="dialog">
-                                {/* if there is a button in form, it will close the modal */}
-                                <button className="absolute right-6 top-4 text-2xl">✕</button>
-                            </form>
-                            {/* modal content */}
-                            <div>
-                                <div className="">
-                                    <h4 className="text-2xl font-semibold mb-1">{detailedTask?.title}</h4>
-                                    <p>In: {detailedTask?.status}</p>
-                                </div>
-
-                                <div className="grid grid-cols-3 gap-x-6 mt-6">
-                                    <div className="col-span-2">
-                                        <div className=" border rounded-md p-3 h-fit">
-                                            <p className="text-sm mb-4">{detailedTask?.description}</p>
-                                            <p><span className="font-medium">Priority: </span><span className={`${detailedTask?.priority === "High" ? 'text-red-600' : (detailedTask?.priority === "Moderate" ? 'text-yellow-600' : 'text-green-600')}`}>{detailedTask?.priority}</span></p>
-                                            <p className="mt-1"><span className="font-medium">Deadline: </span>{detailedTask?.deadline}</p>
-                                        </div>
-                                        <div className="flex gap-4 mt-5 items-center">
-                                            <div className="w-[60px]">
-                                                <img className="rounded-full" src={detailedTask?.userPhoto} alt="" />
-                                            </div>
-                                            <div className="w-full">
-                                                <h5 className="text-sm font-semibold">{detailedTask?.userName}</h5>
-                                                <p className="text-sm">{detailedTask?.userEmail}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-span-1 border rounded-md p-2">
-                                        <ul className="menu font-medium">
-                                            <p className='m-1'>Mark as:</p>
-                                            <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
-                                            <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
-                                            <hr className='my-2' />
-                                            <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
-                                            <li><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-                        <form method="dialog" className="modal-backdrop">
-                            <button>close</button>
+                < dialog id="showTaskDetails" className="modal" >
+                    <div className="modal-box max-w-2xl">
+                        <form method="dialog">
+                            {/* if there is a button in form, it will close the modal */}
+                            <button className="absolute right-6 top-4 text-2xl">✕</button>
                         </form>
-                    </dialog >
-                }
+                        {/* modal content */}
+                        {
+                            !detailedTask ?
+                                <div className="h-full flex justify-center items-center py-32">
+                                    <img src={loadingGIF}></img>
+                                </div>
+                                :
+                                <div>
+                                    <div className="pr-8">
+                                        <h4 className="text-xl font-semibold mb-1">{detailedTask?.title}</h4>
+                                        <p>In: {detailedTask?.status}</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-x-6 mt-6">
+                                        <div className="col-span-2">
+                                            <div className=" border rounded-md p-3 h-fit">
+                                                <p className="text-sm mb-4">{detailedTask?.description}</p>
+                                                <p><span className="font-medium">Priority: </span><span className={`${detailedTask?.priority === "High" ? 'text-red-600' : (detailedTask?.priority === "Moderate" ? 'text-yellow-600' : 'text-green-600')}`}>{detailedTask?.priority}</span></p>
+                                                <p className="mt-1"><span className="font-medium">Deadline: </span>{detailedTask?.deadline}</p>
+                                            </div>
+                                            <div className="flex gap-4 mt-5 items-center">
+                                                <div className="w-[60px]">
+                                                    <img className="rounded-full" src={detailedTask?.userPhoto} alt="" />
+                                                </div>
+                                                <div className="w-full">
+                                                    <h5 className="text-sm font-semibold">{detailedTask?.userName}</h5>
+                                                    <p className="text-sm">{detailedTask?.userEmail}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="col-span-1 border rounded-md p-2 h-fit">
+                                            <ul className="menu font-medium">
+                                                <p className='m-1'>Mark as:</p>
+                                                <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
+                                                <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
+                                                <hr className='my-2' />
+                                                <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
+                                                <li onClick={handleShowDeleteConfirmation}><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
+                                                <div id="task-delete-confirmation" className="border p-3 rounded-md shadow-sm text-center absolute bottom-[15px] right-[190px] bg-white hidden">
+                                                    <h6 className="font-semibold text-lg">Are you sure?</h6>
+                                                    <p className="text-sm my-2">You want to delete the task?</p>
+                                                    <button onClick={() => handleDeleteTaskOnModal(detailedTask?._id)} className="bg-[#6788f3] hover:bg-[#5d7adb] text-white text-sm py-2 px-5 font-medium duration-300 rounded-md">Yes, Delete</button>
+                                                </div>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                        }
+
+                    </div>
+                    <form method="dialog" className="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog >
 
             </SectionContainer >
             <ToastContainer

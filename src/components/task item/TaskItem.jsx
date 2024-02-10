@@ -6,7 +6,7 @@ import { GrPowerCycle } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
 
-const TaskItem = ({ task, handleShowOptions, handleTaskDetails, detailedTask }) => {
+const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete }) => {
     return (
         <div id={task._id} className="bg-white rounded-[4px] py-2 px-3 cursor-pointer mb-3 flex items-center justify-between">
             <div onClick={() => handleTaskDetails(task._id)} className='w-[90%]'>
@@ -32,9 +32,9 @@ const TaskItem = ({ task, handleShowOptions, handleTaskDetails, detailedTask }) 
                         <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
                         <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
                         <hr className='my-2' />
-                        <li><a><FaRegEye className='text-lg' />View Details</a></li>
+                        <li onClick={() => handleTaskDetails(task._id)}><a><FaRegEye className='text-lg' />View Details</a></li>
                         <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
-                        <li><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
+                        <li onClick={() => handleTaskDelete(task._id)}><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
                     </ul>
                 </details>
             </div>
@@ -46,6 +46,7 @@ TaskItem.propTypes = {
     task: PropTypes.object,
     handleShowOptions: PropTypes.func,
     handleTaskDetails: PropTypes.func,
+    handleTaskDelete: PropTypes.func,
     detailedTask: PropTypes.object
 }
 
