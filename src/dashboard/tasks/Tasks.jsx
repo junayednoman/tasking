@@ -11,13 +11,12 @@ import useGetData from "../../custom hooks/get data/useGetData";
 import useContextData from "../../custom hooks/get context data/useContextData";
 import notFound from "../../assets/not found.gif"
 import useAxiosSecure from "../../custom hooks/useAxiosSecure";
-import { GrPowerCycle } from "react-icons/gr";
-import { FaRegCircleCheck } from "react-icons/fa6";
-import { FaRegEdit } from "react-icons/fa";
-import { RiDeleteBin6Line } from "react-icons/ri";
 import Swal from "sweetalert2";
 import { useMutation } from "@tanstack/react-query";
 import useUpdateTaskStatus from "../../custom hooks/update task status/useUpdateTaskStatus";
+import AddTaskModal from "../../components/add task modal/AddTaskModal";
+import TaskDetailsModal from "../../components/task details modal/TaskDetailsModal";
+import UpdateTaskModal from "../../components/update task modal/UpdateTaskModal";
 
 const Tasks = () => {
     const { user } = useContextData();
@@ -59,7 +58,7 @@ const Tasks = () => {
         axiosSecure.get(`/tasks/${user?.email}/${id}`)
             .then(res => {
                 setDetailedTask(res.data)
-            })
+            });
     }
 
 
@@ -147,9 +146,29 @@ const Tasks = () => {
         // console.log(status);
     }
 
+    const handleUpdateTask = (id) => {
+        console.log('object');
+        document.getElementById("taskDetails").close();
+        document.getElementById("update-task-modal").showModal();
+        axiosSecure.get(`/tasks/${user?.email}/${id}`)
+            .then(res => {
+                setDetailedTask(res.data)
+            });
+    }
+
     // const handle options
     const handleShowOptions = (id) => {
         setTaskItemId(id)
+    }
+
+    // data for task details modal
+    const detailsTaskModalData = {
+        detailedTask,
+        loadingGIF,
+        handleUpdateTaskStatus,
+        handleUpdateTask,
+        handleDeleteTaskOnModal,
+        handleShowDeleteConfirmation,
     }
 
     // show error message if occurs any error while fetching the task data from DB
@@ -198,7 +217,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myTodoTasks?.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : myTodoTasks?.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTask={handleUpdateTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -222,7 +241,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myOngoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : myOngoingTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTask={handleUpdateTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -243,7 +262,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myCompletedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : myCompletedTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTask={handleUpdateTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -254,120 +273,14 @@ const Tasks = () => {
                         </div >
                 }
 
-
-                {/* modal for adding todo */}
-                < dialog id="todo-modal" className="modal" >
-                    <div className="modal-box max-w-2xl">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="absolute right-6 top-4 text-2xl">✕</button>
-                        </form>
-                        {/* add task form */}
-                        <h4 className="text-center text-2xl mb-6">Add a new task</h4>
-                        <form onSubmit={handleSubmit(handleTaskSubmit)}>
-                            <label htmlFor="title" className="mt-3 block">
-                                <span className="font-medium">Title</span>
-                                <input required {...register("title")} id="title" type="text" placeholder="Title" className="input input-bordered w-full mt-1" />
-                            </label>
-
-                            <div className="flex gap-3">
-                                <label htmlFor="deadline" className="mt-3 block w-1/2">
-                                    <span className="font-medium">Deadline</span>
-                                    <input required {...register("deadline")} id="deadline" type="date" placeholder="deadline" className="input input-bordered w-full mt-1" />
-                                </label>
-
-                                <label htmlFor="priority" className="mt-3 block w-1/2">
-                                    <span className="font-medium">Priority</span>
-                                    <select defaultValue={"Set priority"} required {...register("priority")} id="priority" className="select select-bordered w-full mt-1">
-                                        <option>High</option>
-                                        <option>Moderate</option>
-                                        <option>Low</option>
-                                    </select>
-                                </label>
-                            </div>
-
-                            <label htmlFor="description" className="mt-3 block mb-3">
-                                <span className="font-medium">Description</span>
-                                <textarea required {...register("description")} id="description" className="textarea textarea-bordered h-[100px] w-full" placeholder="Description"></textarea>
-                            </label>
-                            <Btn text={"Add Task"} fullWidth={true}></Btn>
-                        </form>
-                    </div>
-                    <form method="dialog" className="modal-backdrop">
-                        <button>close</button>
-                    </form>
-                </dialog >
+                {/* modal for adding tasks */}
+                <AddTaskModal handleSubmit={handleSubmit} handleTaskSubmit={handleTaskSubmit} register={register}></AddTaskModal>
 
                 {/* modal for todo details */}
-                < dialog id="taskDetails" className="modal" >
-                    <div className="modal-box max-w-2xl">
-                        <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
-                            <button className="absolute right-6 top-4 text-2xl">✕</button>
-                        </form>
-                        {/* modal content */}
-                        {
-                            !detailedTask ?
-                                <div className="h-full flex justify-center items-center py-32">
-                                    <img src={loadingGIF}></img>
-                                </div>
-                                :
-                                <div>
-                                    <div className="pr-8">
-                                        <h4 className="text-xl font-semibold mb-1">{detailedTask?.title}</h4>
-                                        <p>In: {detailedTask?.status}</p>
-                                    </div>
+                <TaskDetailsModal detailsTaskModalData={detailsTaskModalData}></TaskDetailsModal>
 
-                                    <div className="grid grid-cols-3 gap-x-6 mt-6">
-                                        <div className="col-span-2">
-                                            <div className=" border rounded-md p-3 h-fit">
-                                                <p className="text-sm mb-4">{detailedTask?.description}</p>
-                                                <p><span className="font-medium">Priority: </span><span className={`${detailedTask?.priority === "High" ? 'text-red-600' : (detailedTask?.priority === "Moderate" ? 'text-yellow-600' : 'text-green-600')}`}>{detailedTask?.priority}</span></p>
-                                                <p className="mt-1"><span className="font-medium">Deadline: </span>{detailedTask?.deadline}</p>
-                                            </div>
-                                            <div className="flex gap-4 mt-5 items-center">
-                                                <div className="w-[60px]">
-                                                    <img className="rounded-full" src={detailedTask?.userPhoto} alt="" />
-                                                </div>
-                                                <div className="w-full">
-                                                    <h5 className="text-sm font-semibold">{detailedTask?.userName}</h5>
-                                                    <p className="text-sm">{detailedTask?.userEmail}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="col-span-1 border rounded-md p-2 h-fit">
-                                            <ul className="menu font-medium">
-                                                <p className='m-1'>Mark as:</p>
-                                                {
-                                                    detailedTask?.status != "to-do" &&
-                                                    <li onClick={() => handleUpdateTaskStatus("to-do")}><a><GrPowerCycle className='text-lg' />To-Do</a></li>
-                                                }
-                                                {
-                                                    detailedTask?.status != "ongoing" &&
-                                                    <li onClick={() => handleUpdateTaskStatus("ongoing")}><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
-                                                }
-                                                {
-                                                    detailedTask?.status != "completed" &&
-                                                    <li onClick={() => handleUpdateTaskStatus("completed")}><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
-                                                }
-                                                <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
-                                                <li onClick={handleShowDeleteConfirmation}><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
-                                                <div id="task-delete-confirmation" className="border p-3 rounded-md shadow-sm text-center absolute bottom-[15px] right-[190px] bg-white hidden">
-                                                    <h6 className="font-semibold text-lg">Are you sure?</h6>
-                                                    <p className="text-sm my-2">You want to delete the task?</p>
-                                                    <button onClick={() => handleDeleteTaskOnModal(detailedTask?._id)} className="bg-[#6788f3] hover:bg-[#5d7adb] text-white text-sm py-2 px-5 font-medium duration-300 rounded-md">Yes, Delete</button>
-                                                </div>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                        }
-
-                    </div>
-                    <form method="dialog" className="modal-backdrop">
-                        <button>close</button>
-                    </form>
-                </dialog >
+                {/* modal for updating task */}
+                <UpdateTaskModal taskItems={taskItems}></UpdateTaskModal>
 
             </SectionContainer >
             <ToastContainer

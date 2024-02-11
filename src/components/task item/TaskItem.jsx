@@ -6,7 +6,7 @@ import { GrPowerCycle } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
 
-const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete, handleUpdateTaskStatus }) => {
+const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete, handleUpdateTaskStatus, handleUpdateTask }) => {
     return (
         <div id={task._id} className="bg-white rounded-[4px] py-2 px-3 cursor-pointer mb-3 flex items-center justify-between">
             <div onClick={() => handleTaskDetails(task._id)} className='w-[90%]'>
@@ -45,7 +45,10 @@ const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete
 
                         <hr className='my-2' />
                         <li onClick={() => handleTaskDetails(task._id)}><a><FaRegEye className='text-lg' />View Details</a></li>
-                        <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
+                        {
+                            task?.status != "completed" &&
+                            <li onClick={handleUpdateTask}><a><FaRegEdit className='text-lg' />Edit Task</a></li>
+                        }
                         <li onClick={() => handleTaskDelete(task._id)}><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
                     </ul>
                 </details>
@@ -60,6 +63,7 @@ TaskItem.propTypes = {
     handleTaskDetails: PropTypes.func,
     handleTaskDelete: PropTypes.func,
     handleUpdateTaskStatus: PropTypes.func,
+    handleUpdateTask: PropTypes.func,
     detailedTask: PropTypes.object
 }
 
