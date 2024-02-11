@@ -10,7 +10,7 @@ const Btn = ({ text, fullWidth }) => {
 
 Btn.propTypes = {
     text: PropTypes.string,
-    fullWidth: PropTypes.string
+    fullWidth: PropTypes.bool
 }
 
 export default Btn;

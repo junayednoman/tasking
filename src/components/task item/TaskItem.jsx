@@ -6,7 +6,7 @@ import { GrPowerCycle } from "react-icons/gr";
 import { FaRegCircleCheck } from "react-icons/fa6";
 
 
-const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete }) => {
+const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete, handleUpdateTaskStatus }) => {
     return (
         <div id={task._id} className="bg-white rounded-[4px] py-2 px-3 cursor-pointer mb-3 flex items-center justify-between">
             <div onClick={() => handleTaskDetails(task._id)} className='w-[90%]'>
@@ -29,8 +29,20 @@ const TaskItem = ({ task, handleShowOptions, handleTaskDetails, handleTaskDelete
                     </summary>
                     <ul className="p-2 shadow menu dropdown-content z-[1] bg-base-100 rounded-box w-[180px] font-medium">
                         <p className='m-1'>Mark as:</p>
-                        <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
-                        <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
+                        {
+                            task?.status != "to-do" &&
+                            <li onClick={() => handleUpdateTaskStatus("to-do")}><a><GrPowerCycle className='text-lg' />To-Do</a></li>
+                        }
+                        {
+                            task?.status != "ongoing" &&
+                            <li onClick={() => handleUpdateTaskStatus("ongoing")}><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
+                        }
+                        {
+                            task?.status != "completed" &&
+                            <li onClick={() => handleUpdateTaskStatus("completed")}><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
+                        }
+
+
                         <hr className='my-2' />
                         <li onClick={() => handleTaskDetails(task._id)}><a><FaRegEye className='text-lg' />View Details</a></li>
                         <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
@@ -47,6 +59,7 @@ TaskItem.propTypes = {
     handleShowOptions: PropTypes.func,
     handleTaskDetails: PropTypes.func,
     handleTaskDelete: PropTypes.func,
+    handleUpdateTaskStatus: PropTypes.func,
     detailedTask: PropTypes.object
 }
 

@@ -17,16 +17,21 @@ import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import Swal from "sweetalert2";
 import { useMutation } from "@tanstack/react-query";
+import useUpdateTaskStatus from "../../custom hooks/update task status/useUpdateTaskStatus";
 
 const Tasks = () => {
     const { user } = useContextData();
     const { register, handleSubmit, reset } = useForm();
     const [myTodoTasks, setMyTodoTasks] = useState([]);
     const [myOngoingTasks, setMyOngoingTasks] = useState([]);
+    const [taskItemId, setTaskItemId] = useState("");
     const [myCompletedTasks, setMyCompletedTasks] = useState([]);
     // const [deleteItemId, setDeleteItemId] = useState("");
     const [detailedTask, setDetailedTask] = useState({});
+    // mutation to add task
     const addTaskMutation = usePostData({ url: "/tasks" });
+    // mutation for updating task status
+    const statusMutation = useUpdateTaskStatus({ url: `/tasks/${user?.email}/${taskItemId}` });
     const axiosSecure = useAxiosSecure();
     // get task data based on user email
     const { isPending, data: taskItems, isError, error, refetch } = useGetData({ key: "my-tasks", url: `/tasks/${user?.email}` });
@@ -49,7 +54,8 @@ const Tasks = () => {
 
     // show task details on clicking over task
     const handleTaskDetails = async (id) => {
-        document.getElementById("showTaskDetails").showModal()
+        setTaskItemId(id);
+        document.getElementById("taskDetails").showModal()
         axiosSecure.get(`/tasks/${user?.email}/${id}`)
             .then(res => {
                 setDetailedTask(res.data)
@@ -122,15 +128,28 @@ const Tasks = () => {
                         icon: "success"
                     });
                     document.getElementById("task-delete-confirmation").classList.add("hidden");
-                    document.getElementById("showTaskDetails").close()
+                    document.getElementById("taskDetails").close();
                     refetch();
                 }
             })
     }
 
+    const handleUpdateTaskStatus = (status) => {
+        const updates = { status: status }
+        statusMutation.mutateAsync(updates)
+            .then(res => {
+                if (res?.data?.modifiedCount === 1) {
+                    toast.success(`The task transferred to ${status}`);
+                    refetch();
+                    document.getElementById("taskDetails").close();
+                }
+            })
+        // console.log(status);
+    }
+
     // const handle options
-    const handleShowOptions = () => {
-        // console.log(id);
+    const handleShowOptions = (id) => {
+        setTaskItemId(id)
     }
 
     // show error message if occurs any error while fetching the task data from DB
@@ -179,7 +198,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myTodoTasks?.length < 1 ? <p className="text-[#5D7ADB] font-semibold mb-3">No task to do</p> : myTodoTasks?.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -203,7 +222,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myOngoingTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task ongoing</p> : myOngoingTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -224,7 +243,7 @@ const Tasks = () => {
                                         >
                                             {
                                                 myCompletedTasks.length < 1 ? <p className="text-[#5D7ADB] font-semibold">No task completed</p> : myCompletedTasks.map(task => (
-                                                    <TaskItem detailedTask={detailedTask} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
+                                                    <TaskItem detailedTask={detailedTask} handleUpdateTaskStatus={handleUpdateTaskStatus} handleTaskDelete={handleTaskDelete} handleTaskDetails={handleTaskDetails} handleShowOptions={handleShowOptions} key={task._id} task={task}></TaskItem>
                                                 ))
                                             }
                                         </ReactSortable>
@@ -280,7 +299,7 @@ const Tasks = () => {
                 </dialog >
 
                 {/* modal for todo details */}
-                < dialog id="showTaskDetails" className="modal" >
+                < dialog id="taskDetails" className="modal" >
                     <div className="modal-box max-w-2xl">
                         <form method="dialog">
                             {/* if there is a button in form, it will close the modal */}
@@ -319,9 +338,18 @@ const Tasks = () => {
                                         <div className="col-span-1 border rounded-md p-2 h-fit">
                                             <ul className="menu font-medium">
                                                 <p className='m-1'>Mark as:</p>
-                                                <li><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
-                                                <li><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
-                                                <hr className='my-2' />
+                                                {
+                                                    detailedTask?.status != "to-do" &&
+                                                    <li onClick={() => handleUpdateTaskStatus("to-do")}><a><GrPowerCycle className='text-lg' />To-Do</a></li>
+                                                }
+                                                {
+                                                    detailedTask?.status != "ongoing" &&
+                                                    <li onClick={() => handleUpdateTaskStatus("ongoing")}><a><GrPowerCycle className='text-lg' />Ongoing</a></li>
+                                                }
+                                                {
+                                                    detailedTask?.status != "completed" &&
+                                                    <li onClick={() => handleUpdateTaskStatus("completed")}><a><FaRegCircleCheck className='text-lg' />Completed</a></li>
+                                                }
                                                 <li><a><FaRegEdit className='text-lg' />Edit Task</a></li>
                                                 <li onClick={handleShowDeleteConfirmation}><a className='text-red-600'><RiDeleteBin6Line className='text-lg' />Delete Task</a></li>
                                                 <div id="task-delete-confirmation" className="border p-3 rounded-md shadow-sm text-center absolute bottom-[15px] right-[190px] bg-white hidden">
